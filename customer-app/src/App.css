@@ -1,0 +1,52 @@
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 64px;
+}
+
+.app-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.site-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.site-nav a {
+  color: var(--text);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.site-nav a:hover {
+  color: var(--text-h);
+  background: var(--code-bg);
+}
+
+.site-nav a.active {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+main.container {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
