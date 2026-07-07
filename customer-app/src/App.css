@@ -92,3 +92,64 @@ main.container {
   color: #dc2626;
   border-color: #dc2626;
 }
+
+.customer-form {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.customer-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-h);
+  font-weight: 500;
+}
+
+.customer-form input {
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.customer-form input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.form-actions button {
+  font: inherit;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--border);
+}
+
+.form-actions button.primary {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.form-actions button:hover {
+  color: var(--text-h);
+  border-color: var(--text);
+}
+
+.form-actions button.primary:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
