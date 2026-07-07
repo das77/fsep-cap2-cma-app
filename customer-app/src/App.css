@@ -50,3 +50,45 @@ main.container {
   padding-top: 32px;
   padding-bottom: 48px;
 }
+
+.customer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customer-table th,
+.customer-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.customer-table th {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.customer-table .actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.customer-table .actions a {
+  color: var(--accent);
+}
+
+.customer-table .actions button {
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.customer-table .actions button:hover {
+  color: #dc2626;
+  border-color: #dc2626;
+}
