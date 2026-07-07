@@ -17,6 +17,26 @@ const emptyForm: CustomerFormData = {
   zip: '',
 }
 
+type FormErrors = Partial<Record<keyof CustomerFormData, string>>
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function validate(data: CustomerFormData): FormErrors {
+  const errors: FormErrors = {}
+  if (!data.name.trim()) {
+    errors.name = 'Name is required.'
+  }
+  if (!data.email.trim()) {
+    errors.email = 'Email is required.'
+  } else if (!EMAIL_PATTERN.test(data.email)) {
+    errors.email = 'Enter a valid email address.'
+  }
+  if (!data.phone.trim()) {
+    errors.phone = 'Phone is required.'
+  }
+  return errors
+}
+
 const fields: Array<{
   name: keyof CustomerFormData
   label: string
@@ -36,19 +56,31 @@ function CustomerForm({ initialData, onSubmit, onCancel }: Props) {
   const [formData, setFormData] = useState<CustomerFormData>(
     initialData ?? emptyForm,
   )
+  const [errors, setErrors] = useState<FormErrors>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => {
+      if (!prev[name as keyof CustomerFormData]) return prev
+      const next = { ...prev }
+      delete next[name as keyof CustomerFormData]
+      return next
+    })
   }
 
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const validationErrors = validate(formData)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
     onSubmit(formData)
   }
 
   return (
-    <form className="customer-form" onSubmit={handleSubmit}>
+    <form className="customer-form" onSubmit={handleSubmit} noValidate>
       {fields.map(({ name, label, type }) => (
         <label key={name}>
           {label}
@@ -57,8 +89,10 @@ function CustomerForm({ initialData, onSubmit, onCancel }: Props) {
             name={name}
             value={formData[name]}
             onChange={handleChange}
-            required
+            className={errors[name] ? 'invalid' : undefined}
+            aria-invalid={errors[name] ? true : undefined}
           />
+          {errors[name] && <span className="field-error">{errors[name]}</span>}
         </label>
       ))}
       <div className="form-actions">
