@@ -1,33 +1,53 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CustomerForm from '../components/CustomerForm'
-import { useCustomerContext } from '../context/useCustomerContext'
+import { useCustomerApi } from '../hooks/useCustomerApi'
 import type { CustomerFormData } from '../types/customer'
 
 function EditCustomerPage() {
   const { id } = useParams()
-  const { state, dispatch } = useCustomerContext()
+  const { customers, loading, error, updateCustomer } = useCustomerApi()
   const navigate = useNavigate()
 
-  const customer = state.customers.find((c) => c.id === Number(id))
+  const customer = customers.find((c) => c.id === Number(id))
+
+  if (loading && !customer) {
+    return (
+      <div>
+        <h1>Edit Customer</h1>
+        <p>Loading customer…</p>
+      </div>
+    )
+  }
 
   if (!customer) {
     return (
       <div>
         <h1>Edit Customer</h1>
+        {error && (
+          <p className="error-banner" role="alert">
+            {error}
+          </p>
+        )}
         <p>Customer not found.</p>
         <Link to="/">Back to customer list</Link>
       </div>
     )
   }
 
-  const handleSubmit = (data: CustomerFormData) => {
-    dispatch({ type: 'UPDATE_CUSTOMER', payload: { ...data, id: customer.id } })
-    navigate('/')
+  const handleSubmit = async (data: CustomerFormData) => {
+    if (await updateCustomer({ ...data, id: customer.id })) {
+      navigate('/')
+    }
   }
 
   return (
     <div>
       <h1>Edit Customer</h1>
+      {error && (
+        <p className="error-banner" role="alert">
+          {error}
+        </p>
+      )}
       <CustomerForm
         initialData={customer}
         onSubmit={handleSubmit}
