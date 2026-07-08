@@ -25,6 +25,7 @@ const EMAIL_PATTERN =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/
 const NAME_PATTERN = /^\S+ \S+$/
 const PHONE_PATTERN = /^\d{3}-\d{4}$/
+const ZIP_PATTERN = /^\d{5}(?:-?\d{4})?$/
 
 function validate(data: CustomerFormData): FormErrors {
   const errors: FormErrors = {}
@@ -42,6 +43,9 @@ function validate(data: CustomerFormData): FormErrors {
     errors.phone = 'Phone is required.'
   } else if (!PHONE_PATTERN.test(data.phone.trim())) {
     errors.phone = 'Enter a 7-digit phone number, e.g. 555-0101.'
+  }
+  if (data.zip.trim() && !ZIP_PATTERN.test(data.zip.trim())) {
+    errors.zip = 'Enter a 5-digit or 9-digit ZIP code, e.g. 62704 or 62704-1234.'
   }
   return errors
 }
