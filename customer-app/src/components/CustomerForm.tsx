@@ -44,7 +44,18 @@ function validate(data: CustomerFormData): FormErrors {
   } else if (!PHONE_PATTERN.test(data.phone.trim())) {
     errors.phone = 'Enter a 7-digit phone number, e.g. 555-0101.'
   }
-  if (data.zip.trim() && !ZIP_PATTERN.test(data.zip.trim())) {
+  if (!data.address.trim()) {
+    errors.address = 'Address is required.'
+  }
+  if (!data.city.trim()) {
+    errors.city = 'City is required.'
+  }
+  if (!data.state.trim()) {
+    errors.state = 'State is required.'
+  }
+  if (!data.zip.trim()) {
+    errors.zip = 'ZIP is required.'
+  } else if (!ZIP_PATTERN.test(data.zip.trim())) {
     errors.zip = 'Enter a 5-digit or 9-digit ZIP code, e.g. 62704 or 62704-1234.'
   }
   return errors
