@@ -24,6 +24,7 @@ type FormErrors = Partial<Record<keyof CustomerFormData, string>>
 const EMAIL_PATTERN =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/
 const NAME_PATTERN = /^\S+ \S+$/
+const PHONE_PATTERN = /^\d{3}-\d{4}$/
 
 function validate(data: CustomerFormData): FormErrors {
   const errors: FormErrors = {}
@@ -39,6 +40,8 @@ function validate(data: CustomerFormData): FormErrors {
   }
   if (!data.phone.trim()) {
     errors.phone = 'Phone is required.'
+  } else if (!PHONE_PATTERN.test(data.phone.trim())) {
+    errors.phone = 'Enter a 7-digit phone number, e.g. 555-0101.'
   }
   return errors
 }
