@@ -20,11 +20,14 @@ const emptyForm: CustomerFormData = {
 type FormErrors = Partial<Record<keyof CustomerFormData, string>>
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const NAME_PATTERN = /^\S+ \S+$/
 
 function validate(data: CustomerFormData): FormErrors {
   const errors: FormErrors = {}
   if (!data.name.trim()) {
     errors.name = 'Name is required.'
+  } else if (!NAME_PATTERN.test(data.name.trim())) {
+    errors.name = 'Enter first and last name separated by a space.'
   }
   if (!data.email.trim()) {
     errors.email = 'Email is required.'
