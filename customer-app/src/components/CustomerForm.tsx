@@ -19,7 +19,10 @@ const emptyForm: CustomerFormData = {
 
 type FormErrors = Partial<Record<keyof CustomerFormData, string>>
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// HTML5 spec regex for a valid <input type="email"> value, tightened to
+// require a dot-separated TLD of at least two letters
+const EMAIL_PATTERN =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/
 const NAME_PATTERN = /^\S+ \S+$/
 
 function validate(data: CustomerFormData): FormErrors {
@@ -31,7 +34,7 @@ function validate(data: CustomerFormData): FormErrors {
   }
   if (!data.email.trim()) {
     errors.email = 'Email is required.'
-  } else if (!EMAIL_PATTERN.test(data.email)) {
+  } else if (!EMAIL_PATTERN.test(data.email.trim())) {
     errors.email = 'Enter a valid email address.'
   }
   if (!data.phone.trim()) {
