@@ -1,5 +1,35 @@
 # Design
 
+## File structure
+
+Directory-level map of the repo; see the component tree below for how the
+pieces fit together at runtime.
+
+```text
+fsep-cap2-cma-app/
+├── README.md                  Project overview, getting started, scripts
+├── .github/workflows/
+│   └── deploy-docs.yml        Publishes docs/ to GitHub Pages on push to main
+└── customer-app/              The Vite app (everything runs from here)
+    ├── db.json                Seed customer data, served by JSON Server (:3001)
+    ├── vite.config.ts         Dev server + /api → :3001 proxy for JSON Server
+    ├── docs/                  ARCHITECTURE.md (decisions, diagrams) and this file
+    └── src/
+        ├── main.tsx           Entry point; mounts <App /> with StrictMode
+        ├── App.tsx            CustomerProvider + BrowserRouter + route table
+        ├── components/        Shared UI: Layout (shell), CustomerList (table),
+        │                      CustomerForm (shared add/edit form + validation)
+        ├── pages/             One component per route: CustomerListPage,
+        │                      AddCustomerPage, EditCustomerPage
+        ├── context/           CustomerContext (typed useReducer store),
+        │                      CustomerProvider, useCustomerContext hook
+        ├── hooks/             useCustomerApi — all API calls, loading/error
+        │                      state, re-fetch after mutations
+        ├── types/             Customer interface, CustomerFormData
+        ├── App.css            Component styles (table, form, error banner)
+        └── index.css          Design tokens (colors, --danger) + light/dark themes
+```
+
 ## Component Tree
 
 ```text
