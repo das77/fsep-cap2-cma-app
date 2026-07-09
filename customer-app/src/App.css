@@ -51,6 +51,22 @@ main.container {
   padding-bottom: 48px;
 }
 
+.error-boundary {
+  max-width: 640px;
+  padding-top: 32px;
+  margin: 0 auto;
+}
+
+.error-boundary pre {
+  color: var(--danger);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
 .error-banner {
   color: var(--danger);
   border: 1px solid var(--danger);
