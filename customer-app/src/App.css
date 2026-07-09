@@ -76,6 +76,64 @@ main.container {
   max-width: 480px;
 }
 
+.customer-search {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.customer-search .search-input {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+}
+
+.customer-search input {
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 32px 8px 10px;
+  width: 100%;
+}
+
+.customer-search input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.customer-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.customer-search .clear-search {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.customer-search .clear-search:hover {
+  color: var(--text-h);
+}
+
+.search-count {
+  margin: 0;
+  color: var(--text);
+}
+
 .customer-table {
   width: 100%;
   border-collapse: collapse;
