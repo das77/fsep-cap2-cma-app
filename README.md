@@ -3,8 +3,11 @@
 Customer Management Application — a single-page React application where users
 can view, create, edit, and delete customer records.
 
-**Live docs:** <!-- pages-url -->https://das77.github.io/fsep-cap2-cma-app/<!-- /pages-url -->
-_(link is kept up to date automatically by the docs deploy workflow)_
+**Live app:** <!-- pages-url -->https://das77.github.io/fsep-cap2-cma-app/<!-- /pages-url -->
+**Live docs:** <!-- docs-url -->https://das77.github.io/fsep-cap2-cma-app/docs/<!-- /docs-url -->
+_(links are kept up to date automatically by the deploy workflow. Note: the
+live app is a static build without the JSON Server API, so it shows an error
+banner instead of customer data — run it locally for the full experience.)_
 
 ## Tech stack
 
@@ -50,8 +53,10 @@ store, and every add/update/delete goes through the JSON Server API.
     testing, with Mermaid diagrams) and the
     [design doc](customer-app/docs/DESIGN.md) (file structure, component
     tree, and page wireframes)
-- `.github/workflows/deploy-docs.yml` — publishes `customer-app/docs/` to
-  GitHub Pages on every push to `main` that touches the docs
+- `.github/workflows/deploy-docs.yml` — builds the app and publishes it to
+  GitHub Pages (app at the site root, `customer-app/docs/` under `/docs/`,
+  with a `404.html` SPA fallback for deep links) on every push to `main`
+  that touches `customer-app/`
 
 ## Form validation
 
