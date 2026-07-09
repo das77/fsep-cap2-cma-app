@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import CustomerList from './CustomerList'
 import type { Customer } from '../types/customer'
 
@@ -39,6 +39,10 @@ function renderList(props?: Partial<Parameters<typeof CustomerList>[0]>) {
 }
 
 describe('CustomerList', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('renders all customer names', () => {
     renderList()
 
@@ -53,23 +57,40 @@ describe('CustomerList', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
-  it('calls onDelete with the customer id when Delete is clicked', async () => {
+  it('calls onDelete with the customer id when Delete is confirmed', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const user = userEvent.setup()
     const { onDelete } = renderList()
 
-    const deleteButtons = screen.getAllByRole('button', { name: 'Delete' })
-    await user.click(deleteButtons[1])
+    await user.click(screen.getByRole('button', { name: 'Delete James Chen' }))
 
+    expect(window.confirm).toHaveBeenCalledWith(
+      'Delete James Chen? This cannot be undone.',
+    )
     expect(onDelete).toHaveBeenCalledTimes(1)
     expect(onDelete).toHaveBeenCalledWith(2)
+  })
+
+  it('does not call onDelete when the confirmation is cancelled', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const user = userEvent.setup()
+    const { onDelete } = renderList()
+
+    await user.click(screen.getByRole('button', { name: 'Delete James Chen' }))
+
+    expect(onDelete).not.toHaveBeenCalled()
   })
 
   it('renders an Edit link pointing to the edit route for each customer', () => {
     renderList()
 
-    const editLinks = screen.getAllByRole('link', { name: 'Edit' })
-    expect(editLinks).toHaveLength(2)
-    expect(editLinks[0]).toHaveAttribute('href', '/edit/1')
-    expect(editLinks[1]).toHaveAttribute('href', '/edit/2')
+    expect(screen.getByRole('link', { name: 'Edit Maria Garcia' })).toHaveAttribute(
+      'href',
+      '/edit/1',
+    )
+    expect(screen.getByRole('link', { name: 'Edit James Chen' })).toHaveAttribute(
+      'href',
+      '/edit/2',
+    )
   })
 })
