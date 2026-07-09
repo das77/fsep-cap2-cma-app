@@ -11,15 +11,24 @@ function CustomerList({ customers, onDelete }: Props) {
     return <p>No customers found.</p>
   }
 
+  const confirmDelete = (customer: Customer) => {
+    const confirmed = window.confirm(
+      `Delete ${customer.name}? This cannot be undone.`,
+    )
+    if (confirmed) {
+      onDelete(customer.id)
+    }
+  }
+
   return (
     <table className="customer-table">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>City</th>
-          <th>Actions</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Phone</th>
+          <th scope="col">City</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -30,8 +39,17 @@ function CustomerList({ customers, onDelete }: Props) {
             <td>{customer.phone}</td>
             <td>{customer.city}</td>
             <td className="actions">
-              <Link to={`/edit/${customer.id}`}>Edit</Link>
-              <button type="button" onClick={() => onDelete(customer.id)}>
+              <Link
+                to={`/edit/${customer.id}`}
+                aria-label={`Edit ${customer.name}`}
+              >
+                Edit
+              </Link>
+              <button
+                type="button"
+                aria-label={`Delete ${customer.name}`}
+                onClick={() => confirmDelete(customer)}
+              >
                 Delete
               </button>
             </td>
