@@ -3,12 +3,31 @@ import CustomerList from '../components/CustomerList'
 import CustomerSearch from '../components/CustomerSearch'
 import { useCustomerApi } from '../hooks/useCustomerApi'
 import { filterCustomers } from '../utils/filterCustomers'
+import {
+  loadSort,
+  saveSort,
+  sortCustomers,
+  toggleSort,
+} from '../utils/sortCustomers'
+import type { CustomerSort, SortKey } from '../utils/sortCustomers'
 
 function CustomerListPage() {
   const { customers, loading, error, deleteCustomer } = useCustomerApi()
   const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<CustomerSort | null>(loadSort)
 
-  const filtered = filterCustomers(customers, query)
+  const visibleCustomers = sortCustomers(
+    filterCustomers(customers, query),
+    sort,
+  )
+
+  const handleSortChange = (key: SortKey) => {
+    setSort((current) => {
+      const next = toggleSort(current, key)
+      saveSort(next)
+      return next
+    })
+  }
 
   const handleDelete = (id: number) => {
     void deleteCustomer(id)
@@ -29,10 +48,15 @@ function CustomerListPage() {
           <CustomerSearch
             query={query}
             onQueryChange={setQuery}
-            shownCount={filtered.length}
+            shownCount={visibleCustomers.length}
             totalCount={customers.length}
           />
-          <CustomerList customers={filtered} onDelete={handleDelete} />
+          <CustomerList
+            customers={visibleCustomers}
+            onDelete={handleDelete}
+            sort={sort}
+            onSortChange={handleSortChange}
+          />
         </>
       )}
     </div>
