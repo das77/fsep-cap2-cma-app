@@ -51,6 +51,15 @@ main.container {
   padding-bottom: 48px;
 }
 
+.error-banner {
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  max-width: 480px;
+}
+
 .customer-table {
   width: 100%;
   border-collapse: collapse;

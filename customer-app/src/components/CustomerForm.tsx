@@ -19,20 +19,44 @@ const emptyForm: CustomerFormData = {
 
 type FormErrors = Partial<Record<keyof CustomerFormData, string>>
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// HTML5 spec regex for a valid <input type="email"> value, tightened to
+// require a dot-separated TLD of at least two letters
+const EMAIL_PATTERN =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/
+const NAME_PATTERN = /^\S+ \S+$/
+const PHONE_PATTERN = /^\d{3}-\d{4}$/
+const ZIP_PATTERN = /^\d{5}(?:-?\d{4})?$/
 
 function validate(data: CustomerFormData): FormErrors {
   const errors: FormErrors = {}
   if (!data.name.trim()) {
     errors.name = 'Name is required.'
+  } else if (!NAME_PATTERN.test(data.name.trim())) {
+    errors.name = 'Enter first and last name separated by a space.'
   }
   if (!data.email.trim()) {
     errors.email = 'Email is required.'
-  } else if (!EMAIL_PATTERN.test(data.email)) {
+  } else if (!EMAIL_PATTERN.test(data.email.trim())) {
     errors.email = 'Enter a valid email address.'
   }
   if (!data.phone.trim()) {
     errors.phone = 'Phone is required.'
+  } else if (!PHONE_PATTERN.test(data.phone.trim())) {
+    errors.phone = 'Enter a 7-digit phone number, e.g. 555-0101.'
+  }
+  if (!data.address.trim()) {
+    errors.address = 'Address is required.'
+  }
+  if (!data.city.trim()) {
+    errors.city = 'City is required.'
+  }
+  if (!data.state.trim()) {
+    errors.state = 'State is required.'
+  }
+  if (!data.zip.trim()) {
+    errors.zip = 'ZIP is required.'
+  } else if (!ZIP_PATTERN.test(data.zip.trim())) {
+    errors.zip = 'Enter a 5-digit or 9-digit ZIP code, e.g. 62704 or 62704-1234.'
   }
   return errors
 }
