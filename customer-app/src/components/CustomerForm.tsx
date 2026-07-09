@@ -106,18 +106,24 @@ function CustomerForm({ initialData, onSubmit, onCancel }: Props) {
   return (
     <form className="customer-form" onSubmit={handleSubmit} noValidate>
       {fields.map(({ name, label, type }) => (
-        <label key={name}>
-          {label}
+        <div className="form-field" key={name}>
+          <label htmlFor={name}>{label}</label>
           <input
+            id={name}
             type={type}
             name={name}
             value={formData[name]}
             onChange={handleChange}
             className={errors[name] ? 'invalid' : undefined}
             aria-invalid={errors[name] ? true : undefined}
+            aria-describedby={errors[name] ? `${name}-error` : undefined}
           />
-          {errors[name] && <span className="field-error">{errors[name]}</span>}
-        </label>
+          {errors[name] && (
+            <span className="field-error" id={`${name}-error`}>
+              {errors[name]}
+            </span>
+          )}
+        </div>
       ))}
       <div className="form-actions">
         <button type="submit" className="primary">
