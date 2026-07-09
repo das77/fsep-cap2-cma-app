@@ -9,7 +9,8 @@ pieces fit together at runtime.
 fsep-cap2-cma-app/
 ├── README.md                  Project overview, getting started, scripts
 ├── .github/workflows/
-│   └── deploy-docs.yml        Publishes docs/ to GitHub Pages on push to main
+│   └── deploy-docs.yml        Builds the app and publishes it + docs/ to
+│                              GitHub Pages on push to main
 └── customer-app/              The Vite app (everything runs from here)
     ├── db.json                Seed customer data, served by JSON Server (:3001)
     ├── vite.config.ts         Dev server, /api → :3001 proxy, Vitest config
