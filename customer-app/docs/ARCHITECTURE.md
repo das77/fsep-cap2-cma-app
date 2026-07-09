@@ -9,6 +9,7 @@ decisions apply to, see [DESIGN.md](./DESIGN.md).
 graph TB
     subgraph Browser["Browser — React app (Vite, port 5173)"]
         App["App<br/>(CustomerProvider + BrowserRouter + Routes)"]
+        EB["ErrorBoundary<br/>(fallback UI + Try Again)"]
         Layout["Layout<br/>(header, nav, Outlet)"]
         List["CustomerListPage<br/>/"]
         Add["AddCustomerPage<br/>/add"]
@@ -23,7 +24,8 @@ graph TB
         DB[("db.json")]
     end
 
-    App --> Layout
+    App --> EB
+    EB --> Layout
     Layout --> List
     Layout --> Add
     Layout --> Edit
@@ -177,8 +179,46 @@ is edited. Format rules:
 | ZIP | 5-digit (`62704`) or 9-digit (`62704-1234` or `627041234`) |
 
 API failures are separate from field validation: each page shows the hook's
-`error` state in an `.error-banner`, and on failure the form keeps the user's
-input instead of navigating away.
+`error` state in an `.error-banner` (with a bold "Error:" text prefix so
+color isn't the only signal), and on failure the form keeps the user's input
+instead of navigating away.
+
+## ERROR BOUNDARY
+
+`ErrorBoundary` (`src/components/ErrorBoundary.tsx`) is a class component —
+error boundaries require `getDerivedStateFromError` / `componentDidCatch`,
+which have no function-component equivalent. It wraps `<Routes>` inside
+`BrowserRouter` in `App.tsx`, so a render error in any page or the layout
+shows a friendly fallback (heading, error message in a `<pre>`, and a
+"Try Again" button that clears the error state and re-renders) instead of
+unmounting the whole app. `CustomerProvider` sits above it, so customer
+state survives the error. Caught errors and their component stacks are
+logged to the console.
+
+## ACCESSIBILITY
+
+- Every form input has an explicit `<label htmlFor>` / `id` pair; invalid
+  inputs set `aria-invalid` and `aria-describedby` pointing at their inline
+  error message, so screen readers announce the error with the field.
+- The customer table uses `<thead>` with `scope="col"` headers, and each
+  row's actions have per-customer accessible names via `aria-label`
+  ("Edit Maria Garcia", "Delete Maria Garcia").
+- Delete is a destructive action, so it asks for confirmation
+  (`window.confirm`) before calling the API.
+- Color is reinforced with text everywhere: red-bordered fields always have
+  an error sentence, and error banners are `role="alert"` with a bold
+  "Error:" prefix.
+
+## DEPLOYMENT
+
+`.github/workflows/deploy-docs.yml` builds the app and publishes a combined
+site to GitHub Pages on every push to `main` touching `customer-app/`: the
+Vite build at the site root (built with `--base "/<repo>/"`; the router gets
+the matching `basename` from `import.meta.env.BASE_URL`), these docs under
+`/docs/`, and a `404.html` copy of `index.html` as the SPA fallback for deep
+links. Pages hosting is static — there is no JSON Server — so the deployed
+app shows its error state instead of customer data; full CRUD requires
+running locally with `npm run api`.
 
 ## TESTING
 
@@ -195,7 +235,8 @@ internals: callbacks are `vi.fn()` mocks, interactions go through
 
 | Component | Covered behaviors |
 | --- | --- |
-| `CustomerList` | Renders all customer names; shows "No customers found." for an empty list; Delete calls `onDelete` with the clicked row's id; each Edit link points at `/edit/:id` |
+| `CustomerList` | Renders all customer names; shows "No customers found." for an empty list; Delete calls `onDelete` with the clicked row's id when confirmed and not when cancelled (`window.confirm` mocked); each Edit link points at `/edit/:id` |
 | `CustomerForm` | Empty submit shows every required-field error and never calls `onSubmit`; valid input submits the exact `CustomerFormData`; Cancel calls `onCancel`; `initialData` pre-fills all fields and switches the button to "Update Customer" |
+| `ErrorBoundary` | Renders children when nothing throws; a throwing child shows the `role="alert"` fallback with the error message; "Try Again" restores the children once the error is fixed |
 
 Run with `npm test` (watch) or `npm run test:run` (single pass).
