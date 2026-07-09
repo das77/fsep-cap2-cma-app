@@ -18,7 +18,7 @@ function AddCustomerPage() {
       <h1>Add Customer</h1>
       {error && (
         <p className="error-banner" role="alert">
-          {error}
+          <strong>Error:</strong> {error}
         </p>
       )}
       <CustomerForm onSubmit={handleSubmit} onCancel={() => navigate('/')} />
