@@ -179,3 +179,23 @@ is edited. Format rules:
 API failures are separate from field validation: each page shows the hook's
 `error` state in an `.error-banner`, and on failure the form keeps the user's
 input instead of navigating away.
+
+## TESTING
+
+Component tests run with Vitest + React Testing Library in a jsdom
+environment — no browser or JSON Server needed. Vitest is configured in
+`vite.config.ts` (jsdom, globals, and a setup file at `src/test/setup.ts`
+that registers the jest-dom matchers via `@testing-library/jest-dom/vitest`).
+Tests are colocated with the components they cover.
+
+Tests exercise components through their props and rendered output, not their
+internals: callbacks are `vi.fn()` mocks, interactions go through
+`userEvent`, and assertions query the DOM by role, label, or text.
+`CustomerList` renders `<Link>`, so its tests wrap it in a `MemoryRouter`.
+
+| Component | Covered behaviors |
+| --- | --- |
+| `CustomerList` | Renders all customer names; shows "No customers found." for an empty list; Delete calls `onDelete` with the clicked row's id; each Edit link points at `/edit/:id` |
+| `CustomerForm` | Empty submit shows every required-field error and never calls `onSubmit`; valid input submits the exact `CustomerFormData`; Cancel calls `onCancel`; `initialData` pre-fills all fields and switches the button to "Update Customer" |
+
+Run with `npm test` (watch) or `npm run test:run` (single pass).

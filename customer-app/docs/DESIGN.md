@@ -12,13 +12,15 @@ fsep-cap2-cma-app/
 │   └── deploy-docs.yml        Publishes docs/ to GitHub Pages on push to main
 └── customer-app/              The Vite app (everything runs from here)
     ├── db.json                Seed customer data, served by JSON Server (:3001)
-    ├── vite.config.ts         Dev server + /api → :3001 proxy for JSON Server
+    ├── vite.config.ts         Dev server, /api → :3001 proxy, Vitest config
+    │                          (jsdom environment, globals, setup file)
     ├── docs/                  ARCHITECTURE.md (decisions, diagrams) and this file
     └── src/
         ├── main.tsx           Entry point; mounts <App /> with StrictMode
         ├── App.tsx            CustomerProvider + BrowserRouter + route table
         ├── components/        Shared UI: Layout (shell), CustomerList (table),
-        │                      CustomerForm (shared add/edit form + validation)
+        │                      CustomerForm (shared add/edit form + validation),
+        │                      with colocated *.test.tsx component tests
         ├── pages/             One component per route: CustomerListPage,
         │                      AddCustomerPage, EditCustomerPage
         ├── context/           CustomerContext (typed useReducer store),
@@ -26,6 +28,7 @@ fsep-cap2-cma-app/
         ├── hooks/             useCustomerApi — all API calls, loading/error
         │                      state, re-fetch after mutations
         ├── types/             Customer interface, CustomerFormData
+        ├── test/              Vitest setup (registers jest-dom matchers)
         ├── App.css            Component styles (table, form, error banner)
         └── index.css          Design tokens (colors, --danger) + light/dark themes
 ```

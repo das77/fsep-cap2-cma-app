@@ -12,6 +12,9 @@ _(link is kept up to date automatically by the docs deploy workflow)_
 - **Routing:** React Router (react-router-dom 7)
 - **API:** [JSON Server](https://github.com/typicode/json-server) serving
   `customer-app/db.json` as a REST API on port 3001
+- **Testing:** [Vitest](https://vitest.dev/) +
+  [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+  running in jsdom
 
 ## Current state
 
@@ -34,15 +37,19 @@ store, and every add/update/delete goes through the JSON Server API.
     after every mutation
   - `src/components/` — `Layout` (shared shell: header, nav, `<Outlet />`),
     `CustomerList` (customer table), and `CustomerForm` (shared add/edit form
-    with inline validation)
+    with inline validation), each with a colocated `*.test.tsx` file
+  - `src/test/setup.ts` — Vitest setup: registers the jest-dom matchers
+    (config in `vite.config.ts`: jsdom environment, globals)
   - `src/types/customer.ts` — `Customer` interface and `CustomerFormData`
     (`Omit<Customer, 'id'>`)
   - `db.json` — seed customer data for JSON Server
   - `vite.config.ts` — dev-server proxy: the app fetches `/api/customers`,
     which is forwarded to JSON Server on port 3001
   - `docs/` — [architecture decisions](customer-app/docs/ARCHITECTURE.md)
-    (state management, CRUD via `useReducer`, custom hooks, form modes, with
-    Mermaid diagrams) and the [component tree](customer-app/docs/DESIGN.md)
+    (state management, CRUD via `useReducer`, custom hooks, form modes,
+    testing, with Mermaid diagrams) and the
+    [design doc](customer-app/docs/DESIGN.md) (file structure, component
+    tree, and page wireframes)
 - `.github/workflows/deploy-docs.yml` — publishes `customer-app/docs/` to
   GitHub Pages on every push to `main` that touches the docs
 
@@ -84,3 +91,19 @@ npm run dev   # Vite dev server on http://localhost:5173
 | `npm run build` | Type-check and build for production |
 | `npm run lint` | Run ESLint |
 | `npm run preview` | Preview the production build |
+| `npm test` | Run Vitest in watch mode |
+| `npm run test:run` | Run the test suite once (CI-style) |
+
+## Testing
+
+Component tests live next to the components they cover
+(`src/components/*.test.tsx`) and run with Vitest + React Testing Library in
+a jsdom environment (no browser or API server needed):
+
+- **`CustomerList`** — renders customer names, shows the empty state, calls
+  `onDelete` with the clicked row's id, and points each Edit link at the
+  right `/edit/:id` route (rendered inside a `MemoryRouter`).
+- **`CustomerForm`** — shows required-field errors on empty submit, calls
+  `onSubmit` with the typed form data when valid, calls `onCancel` from the
+  Cancel button, and pre-fills fields (with an "Update Customer" button) in
+  edit mode.
