@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 import type { Customer } from '../types/customer'
+import type { CustomerSort, SortKey } from '../utils/sortCustomers'
 
 type Props = {
   customers: Customer[]
   onDelete: (id: number) => void
+  sort: CustomerSort | null
+  onSortChange: (key: SortKey) => void
 }
 
-function CustomerList({ customers, onDelete }: Props) {
+function CustomerList({ customers, onDelete, sort, onSortChange }: Props) {
   if (customers.length === 0) {
     return <p>No customers found.</p>
   }
@@ -20,14 +23,42 @@ function CustomerList({ customers, onDelete }: Props) {
     }
   }
 
+  const sortableHeader = (key: SortKey, label: string) => {
+    const direction = sort?.key === key ? sort.direction : null
+    return (
+      <th
+        scope="col"
+        aria-sort={
+          direction === 'asc'
+            ? 'ascending'
+            : direction === 'desc'
+              ? 'descending'
+              : undefined
+        }
+      >
+        <button
+          type="button"
+          className="sort-header"
+          onClick={() => onSortChange(key)}
+        >
+          {label}
+          <span className="sort-indicator" aria-hidden="true">
+            {direction === 'asc' ? '▲' : direction === 'desc' ? '▼' : ''}
+          </span>
+        </button>
+      </th>
+    )
+  }
+
   return (
     <table className="customer-table">
       <thead>
         <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Email</th>
+          {sortableHeader('name', 'Name')}
+          {sortableHeader('email', 'Email')}
           <th scope="col">Phone</th>
-          <th scope="col">City</th>
+          {sortableHeader('city', 'City')}
+          {sortableHeader('state', 'State')}
           <th scope="col">Actions</th>
         </tr>
       </thead>
@@ -38,6 +69,7 @@ function CustomerList({ customers, onDelete }: Props) {
             <td>{customer.email}</td>
             <td>{customer.phone}</td>
             <td>{customer.city}</td>
+            <td>{customer.state}</td>
             <td className="actions">
               <Link
                 to={`/edit/${customer.id}`}

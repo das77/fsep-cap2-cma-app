@@ -28,21 +28,26 @@ store, and every add/update/delete goes through the JSON Server API.
   - Routes wired up in `src/App.tsx` with `BrowserRouter`:
     | Path | Page |
     | --- | --- |
-    | `/` | `CustomerListPage` — customer table with per-row Edit / Delete (with confirmation) |
+    | `/` | `CustomerListPage` — customer table with live search, sortable columns, and per-row Edit / Delete (with confirmation) |
     | `/add` | `AddCustomerPage` — blank `CustomerForm`; creates a customer |
     | `/edit/:id` | `EditCustomerPage` — pre-filled `CustomerForm`; shows "Customer not found" for unknown ids |
   - `src/context/` — `CustomerContext` (typed `useReducer` state + actions),
     `CustomerProvider` (wraps the app in `App.tsx`), and the
     `useCustomerContext` consumer hook
-  - `src/hooks/useCustomerApi.ts` — wraps all API calls: fetches the customer
-    list on mount, exposes `addCustomer` / `updateCustomer` /
-    `deleteCustomer`, tracks loading and error state, and re-fetches the list
-    after every mutation
-  - `src/components/` — `Layout` (shared shell: header, nav, `<Outlet />`),
-    `CustomerList` (customer table), `CustomerForm` (shared add/edit form
-    with inline validation), and `ErrorBoundary` (class component that
-    catches render errors and shows a "Try Again" fallback instead of
-    crashing), each with a colocated `*.test.tsx` file
+  - `src/hooks/` — `useCustomerApi` (wraps all API calls: fetches the
+    customer list on mount, exposes `addCustomer` / `updateCustomer` /
+    `deleteCustomer`, tracks loading and error state, and re-fetches the
+    list after every mutation) and `useTheme` (light/dark theme state;
+    applies `data-theme` to `<html>` and persists the choice)
+  - `src/components/` — `Layout` (shared shell: header, nav, dark mode
+    toggle, `<Outlet />`), `CustomerList` (customer table with sortable
+    columns), `CustomerSearch` (search bar with live result count),
+    `CustomerForm` (shared add/edit form with inline validation), and
+    `ErrorBoundary` (class component that catches render errors and shows a
+    "Try Again" fallback instead of crashing), each with a colocated
+    `*.test.tsx` file
+  - `src/utils/` — pure helpers: `filterCustomers` (search matching) and
+    `sortCustomers` (column sort + sessionStorage persistence)
   - `src/test/setup.ts` — Vitest setup: registers the jest-dom matchers
     (config in `vite.config.ts`: jsdom environment, globals)
   - `src/types/customer.ts` — `Customer` interface and `CustomerFormData`
@@ -59,6 +64,20 @@ store, and every add/update/delete goes through the JSON Server API.
   GitHub Pages (app at the site root, `customer-app/docs/` under `/docs/`,
   with a `404.html` SPA fallback for deep links) on every push to `main`
   that touches `customer-app/`
+
+## Customer list features
+
+- **Live search** — filters by name, email, or city as you type
+  (case-insensitive substring match, no submit button), shows a
+  "Showing X of Y customers" count, and has an × button to clear the filter.
+- **Sortable columns** — click Name, Email, City, or State to sort
+  ascending; click again for descending. The sorted column shows a ▲/▼
+  indicator (plus `aria-sort`), and the sort is remembered in
+  `sessionStorage` when navigating away and back.
+- **Dark mode** — a header toggle switches between light and dark themes,
+  both defined as CSS custom properties in `index.css`. An explicit choice
+  is stored in `localStorage` and overrides the OS preference; visitors who
+  never toggle keep following their OS setting.
 
 ## Form validation
 
@@ -118,6 +137,15 @@ a jsdom environment (no browser or API server needed):
 - **`ErrorBoundary`** — renders children normally, shows the fallback with
   the error message when a child throws, and recovers via "Try Again" once
   the error is fixed.
+- **`CustomerSearch`** — reports keystrokes via `onQueryChange`, renders the
+  result count, and shows the clear button only while there's a query.
+- **`Layout`** — renders the nav links; the theme toggle defaults to light,
+  applies `data-theme` to `<html>`, persists toggles to `localStorage`, and
+  honors a stored preference on load.
+- **Utils** — `filterCustomers` (field matching, case-insensitivity,
+  fields that are deliberately not searched) and `sortCustomers` (ordering,
+  direction toggling, storage round-trip, rejection of invalid stored
+  values).
 
 ## Accessibility
 
@@ -126,6 +154,10 @@ a jsdom environment (no browser or API server needed):
   their inline error message.
 - Table headers use `scope="col"`; per-row actions carry descriptive
   accessible names ("Edit Maria Garcia", "Delete Maria Garcia").
+- Sorted columns expose `aria-sort` alongside the visual ▲/▼ indicator, and
+  the search result count is an `aria-live` region so filtering is announced.
+- The theme toggle pairs its icon with text ("🌙 Dark" / "☀️ Light") and an
+  action-descriptive accessible name ("Switch to dark mode").
 - Deleting a customer asks for confirmation first (`window.confirm`).
 - Color is never the only signal: red-bordered fields always show an error
   sentence, and the API error banner (`role="alert"`) leads with a bold

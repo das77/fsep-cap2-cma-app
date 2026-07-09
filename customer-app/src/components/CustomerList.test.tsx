@@ -30,12 +30,19 @@ const customers: Customer[] = [
 
 function renderList(props?: Partial<Parameters<typeof CustomerList>[0]>) {
   const onDelete = vi.fn()
+  const onSortChange = vi.fn()
   render(
     <MemoryRouter>
-      <CustomerList customers={customers} onDelete={onDelete} {...props} />
+      <CustomerList
+        customers={customers}
+        onDelete={onDelete}
+        sort={null}
+        onSortChange={onSortChange}
+        {...props}
+      />
     </MemoryRouter>,
   )
-  return { onDelete }
+  return { onDelete, onSortChange }
 }
 
 describe('CustomerList', () => {
@@ -92,5 +99,33 @@ describe('CustomerList', () => {
       'href',
       '/edit/2',
     )
+  })
+
+  it('calls onSortChange with the column key when a sortable header is clicked', async () => {
+    const user = userEvent.setup()
+    const { onSortChange } = renderList()
+
+    await user.click(screen.getByRole('button', { name: 'City' }))
+
+    expect(onSortChange).toHaveBeenCalledWith('city')
+  })
+
+  it('marks the sorted column with aria-sort and an indicator', () => {
+    renderList({ sort: { key: 'name', direction: 'asc' } })
+
+    const nameHeader = screen.getByRole('columnheader', { name: /Name/ })
+    expect(nameHeader).toHaveAttribute('aria-sort', 'ascending')
+    expect(nameHeader).toHaveTextContent('▲')
+
+    const emailHeader = screen.getByRole('columnheader', { name: 'Email' })
+    expect(emailHeader).not.toHaveAttribute('aria-sort')
+  })
+
+  it('flips the indicator for a descending sort', () => {
+    renderList({ sort: { key: 'name', direction: 'desc' } })
+
+    const nameHeader = screen.getByRole('columnheader', { name: /Name/ })
+    expect(nameHeader).toHaveAttribute('aria-sort', 'descending')
+    expect(nameHeader).toHaveTextContent('▼')
   })
 })

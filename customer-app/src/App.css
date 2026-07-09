@@ -46,6 +46,22 @@
   background: var(--accent-bg);
 }
 
+.theme-toggle {
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--text-h);
+  background: var(--code-bg);
+}
+
 main.container {
   padding-top: 32px;
   padding-bottom: 48px;
@@ -76,6 +92,64 @@ main.container {
   max-width: 480px;
 }
 
+.customer-search {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.customer-search .search-input {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+}
+
+.customer-search input {
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 32px 8px 10px;
+  width: 100%;
+}
+
+.customer-search input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.customer-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.customer-search .clear-search {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.customer-search .clear-search:hover {
+  color: var(--text-h);
+}
+
+.search-count {
+  margin: 0;
+  color: var(--text);
+}
+
 .customer-table {
   width: 100%;
   border-collapse: collapse;
@@ -91,6 +165,28 @@ main.container {
 .customer-table th {
   color: var(--text-h);
   font-weight: 600;
+}
+
+.customer-table .sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-h);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.customer-table .sort-header:hover {
+  color: var(--accent);
+}
+
+.customer-table .sort-indicator {
+  font-size: 10px;
+  min-width: 1em;
 }
 
 .customer-table .actions {
