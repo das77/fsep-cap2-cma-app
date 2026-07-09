@@ -10,7 +10,7 @@ import './App.css'
 function App() {
   return (
     <CustomerProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <ErrorBoundary>
           <Routes>
             <Route element={<Layout />}>
