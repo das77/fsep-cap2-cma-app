@@ -15,6 +15,7 @@ graph TB
         Add["AddCustomerPage<br/>/add"]
         Edit["EditCustomerPage<br/>/edit/:id"]
         Form["CustomerForm<br/>(shared add/edit form)"]
+        Search["CustomerSearch<br/>(live filter + result count)"]
         Hook["useCustomerApi<br/>(API calls, loading/error state)"]
         Store["CustomerContext<br/>(useReducer store)"]
     end
@@ -31,6 +32,7 @@ graph TB
     Layout --> Edit
     Add --> Form
     Edit --> Form
+    List --> Search
     List -.reads customers / calls CRUD.-> Hook
     Form -.submits via page callbacks.-> Hook
     Hook -->|dispatch| Store
@@ -140,6 +142,9 @@ sequenceDiagram
 - `useCustomerContext` (`src/context/useCustomerContext.ts`) — consumes
   `CustomerContext`, returning `{ state, dispatch }` and throwing a
   descriptive error when used outside `CustomerProvider`.
+- `useTheme` (`src/hooks/useTheme.ts`) — owns the light/dark theme state,
+  stamps `data-theme` onto `<html>`, and persists explicit toggles to
+  `localStorage` (see THEMING below).
 
 (Form field state and validation ended up living inside `CustomerForm` itself
 with `useState`, rather than in the separate `useCustomerForm` hook originally
@@ -183,6 +188,47 @@ API failures are separate from field validation: each page shows the hook's
 color isn't the only signal), and on failure the form keeps the user's input
 instead of navigating away.
 
+## LIST FILTERING & SORTING
+
+Search and sort are client-side view state, derived on render and kept out
+of the store — the context always holds the full server list:
+
+```text
+customers (context) → filterCustomers(query) → sortCustomers(sort) → table
+```
+
+- `filterCustomers` (`src/utils/filterCustomers.ts`) — case-insensitive
+  substring match against name, email, or city; empty/whitespace queries
+  return everything. `CustomerSearch` renders the input (with an × clear
+  button and an `aria-live` "Showing X of Y customers" count) and reports
+  keystrokes; `CustomerListPage` owns the query state.
+- `sortCustomers` (`src/utils/sortCustomers.ts`) — locale-aware,
+  case-insensitive sort by name, email, city, or state; `toggleSort`
+  implements the click cycle (new column → ascending, same column → flip
+  direction). The current sort is persisted to `sessionStorage`
+  (`customer-list-sort`) and restored when the page remounts, so it
+  survives navigating away and back; `loadSort` validates stored values and
+  falls back to unsorted. `CustomerList` renders the header buttons and
+  ▲/▼ + `aria-sort` indicators but stays stateless.
+
+Both utils are pure functions, tested without any DOM.
+
+## THEMING
+
+Theme colors live as CSS custom properties in `index.css`, defined three
+times: `:root` (light defaults), a `prefers-color-scheme: dark` media query
+(OS preference / no-JS fallback), and `:root[data-theme='light'|'dark']`
+overrides that win in both directions once set. Every component draws only
+from the variables (`--bg`, `--text`, `--border`, `--accent`, `--danger`,
+…), so the toggle restyles the table, form, nav, and error boundary with no
+per-component work. The overrides also set `color-scheme`, flipping native
+controls.
+
+`useTheme` decides the initial theme (stored choice, else OS preference)
+and applies `data-theme` to `<html>`; the Layout header renders the toggle
+button. The preference is written to `localStorage` only on an explicit
+toggle — users who never touch it keep following their OS setting.
+
 ## ERROR BOUNDARY
 
 `ErrorBoundary` (`src/components/ErrorBoundary.tsx`) is a class component —
@@ -205,6 +251,12 @@ logged to the console.
   ("Edit Maria Garcia", "Delete Maria Garcia").
 - Delete is a destructive action, so it asks for confirmation
   (`window.confirm`) before calling the API.
+- Sorted columns set `aria-sort` on the `<th>` alongside the visual ▲/▼
+  indicator; the search result count is an `aria-live="polite"` region so
+  filtering is announced as the user types.
+- The dark mode toggle pairs its icon with visible text and an
+  action-descriptive accessible name ("Switch to dark mode" /
+  "Switch to light mode").
 - Color is reinforced with text everywhere: red-bordered fields always have
   an error sentence, and error banners are `role="alert"` with a bold
   "Error:" prefix.
@@ -235,8 +287,11 @@ internals: callbacks are `vi.fn()` mocks, interactions go through
 
 | Component | Covered behaviors |
 | --- | --- |
-| `CustomerList` | Renders all customer names; shows "No customers found." for an empty list; Delete calls `onDelete` with the clicked row's id when confirmed and not when cancelled (`window.confirm` mocked); each Edit link points at `/edit/:id` |
+| `CustomerList` | Renders all customer names; shows "No customers found." for an empty list; Delete calls `onDelete` with the clicked row's id when confirmed and not when cancelled (`window.confirm` mocked); each Edit link points at `/edit/:id`; header clicks report the column key; the sorted column carries `aria-sort` and the ▲/▼ indicator |
 | `CustomerForm` | Empty submit shows every required-field error and never calls `onSubmit`; valid input submits the exact `CustomerFormData`; Cancel calls `onCancel`; `initialData` pre-fills all fields and switches the button to "Update Customer" |
+| `CustomerSearch` | Typing fires `onQueryChange`; the result count renders; the clear button clears the query and is hidden when the query is empty |
+| `Layout` | Renders the nav links; theme defaults to light and is applied to `<html>`; toggling switches to dark and persists to `localStorage`; a stored preference is honored on load |
 | `ErrorBoundary` | Renders children when nothing throws; a throwing child shows the `role="alert"` fallback with the error message; "Try Again" restores the children once the error is fixed |
+| `filterCustomers` / `sortCustomers` (utils) | Field matching, case-insensitivity, and unsearched fields; sort ordering both directions, direction toggling, no input mutation, and the sessionStorage round-trip incl. invalid values |
 
 Run with `npm test` (watch) or `npm run test:run` (single pass).
