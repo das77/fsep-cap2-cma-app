@@ -125,10 +125,13 @@ main.container {
   gap: 16px;
 }
 
-.customer-form label {
+.customer-form .form-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.customer-form label {
   color: var(--text-h);
   font-weight: 500;
 }
