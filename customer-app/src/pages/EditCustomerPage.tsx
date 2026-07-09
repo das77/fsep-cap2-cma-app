@@ -25,7 +25,7 @@ function EditCustomerPage() {
         <h1>Edit Customer</h1>
         {error && (
           <p className="error-banner" role="alert">
-            {error}
+            <strong>Error:</strong> {error}
           </p>
         )}
         <p>Customer not found.</p>

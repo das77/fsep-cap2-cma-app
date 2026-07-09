@@ -3,8 +3,11 @@
 Customer Management Application — a single-page React application where users
 can view, create, edit, and delete customer records.
 
-**Live docs:** <!-- pages-url -->https://das77.github.io/fsep-cap2-cma-app/<!-- /pages-url -->
-_(link is kept up to date automatically by the docs deploy workflow)_
+**Live app:** <!-- pages-url -->https://das77.github.io/fsep-cap2-cma-app/<!-- /pages-url -->
+**Live docs:** <!-- docs-url -->https://das77.github.io/fsep-cap2-cma-app/docs/<!-- /docs-url -->
+_(links are kept up to date automatically by the deploy workflow. Note: the
+live app is a static build without the JSON Server API, so it shows an error
+banner instead of customer data — run it locally for the full experience.)_
 
 ## Tech stack
 
@@ -25,7 +28,7 @@ store, and every add/update/delete goes through the JSON Server API.
   - Routes wired up in `src/App.tsx` with `BrowserRouter`:
     | Path | Page |
     | --- | --- |
-    | `/` | `CustomerListPage` — customer table with per-row Edit / Delete |
+    | `/` | `CustomerListPage` — customer table with per-row Edit / Delete (with confirmation) |
     | `/add` | `AddCustomerPage` — blank `CustomerForm`; creates a customer |
     | `/edit/:id` | `EditCustomerPage` — pre-filled `CustomerForm`; shows "Customer not found" for unknown ids |
   - `src/context/` — `CustomerContext` (typed `useReducer` state + actions),
@@ -36,8 +39,10 @@ store, and every add/update/delete goes through the JSON Server API.
     `deleteCustomer`, tracks loading and error state, and re-fetches the list
     after every mutation
   - `src/components/` — `Layout` (shared shell: header, nav, `<Outlet />`),
-    `CustomerList` (customer table), and `CustomerForm` (shared add/edit form
-    with inline validation), each with a colocated `*.test.tsx` file
+    `CustomerList` (customer table), `CustomerForm` (shared add/edit form
+    with inline validation), and `ErrorBoundary` (class component that
+    catches render errors and shows a "Try Again" fallback instead of
+    crashing), each with a colocated `*.test.tsx` file
   - `src/test/setup.ts` — Vitest setup: registers the jest-dom matchers
     (config in `vite.config.ts`: jsdom environment, globals)
   - `src/types/customer.ts` — `Customer` interface and `CustomerFormData`
@@ -50,8 +55,10 @@ store, and every add/update/delete goes through the JSON Server API.
     testing, with Mermaid diagrams) and the
     [design doc](customer-app/docs/DESIGN.md) (file structure, component
     tree, and page wireframes)
-- `.github/workflows/deploy-docs.yml` — publishes `customer-app/docs/` to
-  GitHub Pages on every push to `main` that touches the docs
+- `.github/workflows/deploy-docs.yml` — builds the app and publishes it to
+  GitHub Pages (app at the site root, `customer-app/docs/` under `/docs/`,
+  with a `404.html` SPA fallback for deep links) on every push to `main`
+  that touches `customer-app/`
 
 ## Form validation
 
@@ -101,9 +108,28 @@ Component tests live next to the components they cover
 a jsdom environment (no browser or API server needed):
 
 - **`CustomerList`** — renders customer names, shows the empty state, calls
-  `onDelete` with the clicked row's id, and points each Edit link at the
-  right `/edit/:id` route (rendered inside a `MemoryRouter`).
+  `onDelete` with the clicked row's id after the confirmation is accepted
+  (and not when it's cancelled), and points each Edit link at the right
+  `/edit/:id` route (rendered inside a `MemoryRouter`).
 - **`CustomerForm`** — shows required-field errors on empty submit, calls
   `onSubmit` with the typed form data when valid, calls `onCancel` from the
   Cancel button, and pre-fills fields (with an "Update Customer" button) in
   edit mode.
+- **`ErrorBoundary`** — renders children normally, shows the fallback with
+  the error message when a child throws, and recovers via "Try Again" once
+  the error is fixed.
+
+## Accessibility
+
+- Form inputs have explicit `<label htmlFor>` / `id` associations, and
+  invalid fields set `aria-invalid` plus `aria-describedby` pointing at
+  their inline error message.
+- Table headers use `scope="col"`; per-row actions carry descriptive
+  accessible names ("Edit Maria Garcia", "Delete Maria Garcia").
+- Deleting a customer asks for confirmation first (`window.confirm`).
+- Color is never the only signal: red-bordered fields always show an error
+  sentence, and the API error banner (`role="alert"`) leads with a bold
+  "Error:" prefix.
+- A render error anywhere in the routed UI is caught by `ErrorBoundary`,
+  which shows a friendly `role="alert"` fallback with the error details and
+  a "Try Again" reset button instead of a blank page.

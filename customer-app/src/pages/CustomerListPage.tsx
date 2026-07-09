@@ -13,7 +13,7 @@ function CustomerListPage() {
       <h1>Customers</h1>
       {error && (
         <p className="error-banner" role="alert">
-          {error}
+          <strong>Error:</strong> {error}
         </p>
       )}
       {loading && customers.length === 0 ? (

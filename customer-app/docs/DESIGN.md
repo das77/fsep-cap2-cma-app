@@ -9,7 +9,8 @@ pieces fit together at runtime.
 fsep-cap2-cma-app/
 ├── README.md                  Project overview, getting started, scripts
 ├── .github/workflows/
-│   └── deploy-docs.yml        Publishes docs/ to GitHub Pages on push to main
+│   └── deploy-docs.yml        Builds the app and publishes it + docs/ to
+│                              GitHub Pages on push to main
 └── customer-app/              The Vite app (everything runs from here)
     ├── db.json                Seed customer data, served by JSON Server (:3001)
     ├── vite.config.ts         Dev server, /api → :3001 proxy, Vitest config
@@ -20,6 +21,7 @@ fsep-cap2-cma-app/
         ├── App.tsx            CustomerProvider + BrowserRouter + route table
         ├── components/        Shared UI: Layout (shell), CustomerList (table),
         │                      CustomerForm (shared add/edit form + validation),
+        │                      ErrorBoundary (render-error fallback + Try Again),
         │                      with colocated *.test.tsx component tests
         ├── pages/             One component per route: CustomerListPage,
         │                      AddCustomerPage, EditCustomerPage
@@ -38,16 +40,20 @@ fsep-cap2-cma-app/
 ```text
 App
 └── CustomerProvider (CustomerContext: useReducer customer state)
-    └── BrowserRouter + Routes
-        └── Layout (header with app name, nav links, <Outlet />)
-            ├── CustomerListPage          route: /
-            │   └── CustomerList (table; one row per customer with
-            │                     Edit link + Delete button)
-            ├── AddCustomerPage           route: /add
-            │   └── CustomerForm (starts empty; submit → addCustomer)
-            └── EditCustomerPage          route: /edit/:id
-                └── CustomerForm (pre-filled from :id; submit → updateCustomer;
-                                  falls back to "Customer not found.")
+    └── BrowserRouter
+        └── ErrorBoundary (catches render errors; fallback + Try Again)
+            └── Routes
+                └── Layout (header with app name, nav links, <Outlet />)
+                    ├── CustomerListPage          route: /
+                    │   └── CustomerList (table; one row per customer with
+                    │                     Edit link + Delete button, which
+                    │                     confirms before deleting)
+                    ├── AddCustomerPage           route: /add
+                    │   └── CustomerForm (starts empty; submit → addCustomer)
+                    └── EditCustomerPage          route: /edit/:id
+                        └── CustomerForm (pre-filled from :id; submit →
+                                          updateCustomer; falls back to
+                                          "Customer not found.")
 ```
 
 Customer state lives in `CustomerContext` (see
@@ -56,7 +62,9 @@ top of the tree. Each page calls the `useCustomerApi` hook, which reads
 customers from the context and exposes the CRUD functions plus loading and
 error state. `CustomerForm` is a single shared component that owns its field
 state and validation; the add and edit pages differ only in the initial values
-and submit callback they pass it.
+and submit callback they pass it. `ErrorBoundary` sits inside the router but
+above the routes, so a render error anywhere in a page shows its fallback
+while customer state survives for the "Try Again" recovery.
 
 ## Wireframes
 
@@ -66,8 +74,9 @@ name, `Customers` / `Add Customer` nav links, and the routed page below.
 ### Customer list — `/`
 
 Customers from the store in a table; `Edit` links to `/edit/:id`, `Delete`
-calls the API. Shows "Loading customers…" during the initial fetch and
-"No customers found." when the list is empty.
+asks for confirmation (`window.confirm`) and then calls the API. Shows
+"Loading customers…" during the initial fetch and "No customers found." when
+the list is empty.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────┐
